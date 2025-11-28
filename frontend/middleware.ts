@@ -9,7 +9,12 @@ export function middleware(request: NextRequest) {
 
   // Rotas públicas (não requerem autenticação)
   const publicRoutes = ['/login', '/register', '/'];
-  const isPublicRoute = publicRoutes.some(route => pathname.startsWith(route));
+  const isPublicRoute = publicRoutes.some(route => {
+    if (route === '/') {
+      return pathname === '/';
+    }
+    return pathname.startsWith(route);
+  });
 
   // Se está tentando acessar rota pública e está autenticado, redireciona
   if (isPublicRoute && token) {
