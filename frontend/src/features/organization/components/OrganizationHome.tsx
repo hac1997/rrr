@@ -119,7 +119,7 @@ const OrganizationHome: React.FC<OrganizationHomeProps> = ({ onLogout }) => {
           />
         );
       case 'closed-events':
-        return <ClosedEvents events={orgProfile?.historicalEvents || []} />;
+        return <ClosedEvents events={orgProfile?.historicalEvents || []} organizationName={orgData.name} />;
       case 'statistics':
         return <OrganizationStats orgData={orgData} />;
       case 'settings':

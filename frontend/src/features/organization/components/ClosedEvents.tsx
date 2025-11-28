@@ -5,9 +5,11 @@ import { Calendar, MapPin, Users, Award, Search, Eye, Download, TrendingUp, Chec
 import { EVENT_CATEGORIES } from '@/lib/services/orgData';
 import { OrgEventSummary } from '@/lib/types';
 import { toast } from 'sonner';
+import { generateEventReport, generateVolunteerSummaryReport } from '@/lib/utils/pdf-generator';
 
 interface ClosedEventsProps {
   events: OrgEventSummary[];
+  organizationName?: string;
 }
 
 interface VolunteerCertificate {
@@ -20,7 +22,7 @@ interface VolunteerCertificate {
   certificateCode?: string;
 }
 
-const ClosedEvents: React.FC<ClosedEventsProps> = ({ events }) => {
+const ClosedEvents: React.FC<ClosedEventsProps> = ({ events, organizationName = 'Organização' }) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [filterCategory, setFilterCategory] = useState('all');
   const [selectedEvent, setSelectedEvent] = useState<OrgEventSummary | null>(null);
@@ -47,8 +49,32 @@ const ClosedEvents: React.FC<ClosedEventsProps> = ({ events }) => {
     setShowDetailsModal(true);
   };
 
-  const handleDownloadReport = (id: number) => {
-    toast.success('Relatório baixado com sucesso!');
+  const handleDownloadReport = (event: OrgEventSummary) => {
+    try {
+      const mockVolunteers = Array.from({ length: event.volunteers }, (_, i) => ({
+        name: `Voluntário ${i + 1}`,
+        email: `voluntario${i + 1}@example.com`,
+        hours: event.hours,
+        role: 'Voluntário Geral',
+        status: 'Presente' as const
+      }));
+
+      generateEventReport(event, organizationName, mockVolunteers);
+      toast.success('Relatório gerado com sucesso!');
+    } catch (error) {
+      console.error('Erro ao gerar relatório:', error);
+      toast.error('Erro ao gerar relatório. Tente novamente.');
+    }
+  };
+
+  const handleDownloadAllReports = () => {
+    try {
+      generateVolunteerSummaryReport(events, organizationName);
+      toast.success('Relatório geral gerado com sucesso!');
+    } catch (error) {
+      console.error('Erro ao gerar relatório geral:', error);
+      toast.error('Erro ao gerar relatório. Tente novamente.');
+    }
   };
 
   const handleViewCertificates = (event: OrgEventSummary) => {
@@ -71,8 +97,20 @@ const ClosedEvents: React.FC<ClosedEventsProps> = ({ events }) => {
   return (
     <div className="bg-white rounded-xl shadow-sm border border-gray-100">
       <div className="p-6 border-b border-gray-200">
-        <h2 className="text-2xl font-bold text-gray-800 mb-2">Eventos Encerrados</h2>
-        <p className="text-gray-600">Histórico completo de eventos realizados pela organização</p>
+        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+          <div>
+            <h2 className="text-2xl font-bold text-gray-800 mb-2">Eventos Encerrados</h2>
+            <p className="text-gray-600">Histórico completo de eventos realizados pela organização</p>
+          </div>
+          <button
+            onClick={handleDownloadAllReports}
+            disabled={events.length === 0}
+            className="px-6 py-3 bg-gradient-to-r from-primary to-secondary text-white rounded-lg hover:shadow-lg transition-all duration-200 flex items-center font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            <FileText className="h-5 w-5 mr-2" />
+            Baixar Relatório Geral
+          </button>
+        </div>
       </div>
 
       <div className="p-6">
@@ -201,7 +239,7 @@ const ClosedEvents: React.FC<ClosedEventsProps> = ({ events }) => {
                     Ver Detalhes
                   </button>
                   <button
-                    onClick={() => handleDownloadReport(event.id)}
+                    onClick={() => handleDownloadReport(event)}
                     className="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors flex items-center"
                   >
                     <Download className="h-4 w-4 mr-2" />
@@ -332,7 +370,7 @@ const ClosedEvents: React.FC<ClosedEventsProps> = ({ events }) => {
               {/* Action Buttons */}
               <div className="flex justify-end space-x-3 pt-4 border-t border-gray-200">
                 <button
-                  onClick={() => handleDownloadReport(selectedEvent.id)}
+                  onClick={() => handleDownloadReport(selectedEvent)}
                   className="px-6 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors flex items-center"
                 >
                   <Download className="h-4 w-4 mr-2" />

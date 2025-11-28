@@ -19,6 +19,12 @@ interface WorkSchedule {
   endTime: string;
 }
 
+interface RoleDetails {
+  name: string;
+  responsibilities: string[];
+  maxVolunteers: number;
+}
+
 // Tipo para armazenar erros de validação
 interface FormErrors {
   [key: string]: string;
@@ -40,6 +46,12 @@ const EventCreation: React.FC<EventCreationProps> = ({ onSuccess, eventToEdit })
 
   const [roles, setRoles] = useState<string[]>(['']);
   const [responsibilities, setResponsibilities] = useState<string[]>(['']);
+  const [rolesWithDetails, setRolesWithDetails] = useState<RoleDetails[]>([{
+    name: '',
+    responsibilities: [''],
+    maxVolunteers: 1
+  }]);
+  const [useAdvancedRoles, setUseAdvancedRoles] = useState(false);
   const [schedules, setSchedules] = useState<WorkSchedule[]>([{ date: '', startTime: '', endTime: '' }]);
   const [errors, setErrors] = useState<FormErrors>({}); // Estado para erros
   // NOVO ESTADO: Controla se o usuário já tentou submeter o formulário
@@ -263,6 +275,43 @@ const EventCreation: React.FC<EventCreationProps> = ({ onSuccess, eventToEdit })
 
   // Funções de manipulação de listas (Não precisam de lógica extra, pois o useMemo e useEffect tratam a validação)
   const addRole = () => setRoles([...roles, '']);
+
+  const addAdvancedRole = () => setRolesWithDetails([
+    ...rolesWithDetails,
+    { name: '', responsibilities: [''], maxVolunteers: 1 }
+  ]);
+
+  const updateAdvancedRole = (index: number, field: keyof RoleDetails, value: any) => {
+    const updated = [...rolesWithDetails];
+    updated[index] = { ...updated[index], [field]: value };
+    setRolesWithDetails(updated);
+  };
+
+  const removeAdvancedRole = (index: number) => {
+    if (rolesWithDetails.length > 1) {
+      setRolesWithDetails(rolesWithDetails.filter((_, i) => i !== index));
+    }
+  };
+
+  const addRoleResponsibility = (roleIndex: number) => {
+    const updated = [...rolesWithDetails];
+    updated[roleIndex].responsibilities.push('');
+    setRolesWithDetails(updated);
+  };
+
+  const updateRoleResponsibility = (roleIndex: number, respIndex: number, value: string) => {
+    const updated = [...rolesWithDetails];
+    updated[roleIndex].responsibilities[respIndex] = value;
+    setRolesWithDetails(updated);
+  };
+
+  const removeRoleResponsibility = (roleIndex: number, respIndex: number) => {
+    const updated = [...rolesWithDetails];
+    if (updated[roleIndex].responsibilities.length > 1) {
+      updated[roleIndex].responsibilities = updated[roleIndex].responsibilities.filter((_, i) => i !== respIndex);
+      setRolesWithDetails(updated);
+    }
+  };
   const updateRole = (index: number, value: string) => {
     const newRoles = [...roles];
     newRoles[index] = value;
@@ -601,43 +650,170 @@ const EventCreation: React.FC<EventCreationProps> = ({ onSuccess, eventToEdit })
           <ErrorMessage message={errors.benefits} />
         </section>
 
-        {/* Roles/Functions */}
-        <section>
-          <h3 className="text-lg font-semibold text-gray-800 mb-4 flex items-center">
-            <Briefcase className="h-5 w-5 mr-2 text-green-500" />
-            Funções Disponíveis *
-          </h3>
-          <div className="space-y-3">
-            {roles.map((role: string, index: number) => (
-              <div key={index} className="flex items-center space-x-2">
-                <input
-                  type="text"
-                  value={role}
-                  onChange={(e) => updateRole(index, e.target.value)}
-                  className={`flex-1 px-4 py-2 border rounded-lg focus:ring-2 focus:border-transparent ${getBorderClass('roles')}`}
-                  placeholder="Ex: Coordenador de equipe, Recepcionista, etc."
-                />
-                {roles.length > 1 && (
-                  <button
-                    type="button"
-                    onClick={() => removeRole(index)}
-                    className="px-3 py-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors text-sm"
-                  >
-                    Remover
-                  </button>
-                )}
-              </div>
-            ))}
-            <ErrorMessage message={errors.roles} />
-            <button
-              type="button"
-              onClick={addRole}
-              className="text-green-600 hover:text-green-700 font-medium text-sm pt-2"
-            >
-              + Adicionar Função
-            </button>
+        {/* Role Management Toggle */}
+        <section className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+          <div className="flex items-center justify-between mb-2">
+            <h3 className="text-lg font-semibold text-gray-800 flex items-center">
+              <Briefcase className="h-5 w-5 mr-2 text-blue-600" />
+              Gerenciamento de Funções
+            </h3>
+            <label className="flex items-center cursor-pointer">
+              <input
+                type="checkbox"
+                checked={useAdvancedRoles}
+                onChange={(e) => setUseAdvancedRoles(e.target.checked)}
+                className="sr-only peer"
+              />
+              <div className="relative w-11 h-6 bg-gray-300 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+              <span className="ml-3 text-sm font-medium text-gray-700">Modo Avançado</span>
+            </label>
           </div>
+          <p className="text-sm text-gray-600">
+            {useAdvancedRoles
+              ? 'Atribua responsabilidades e limite de voluntários específicos para cada função'
+              : 'Modo simplificado: liste funções e responsabilidades gerais'}
+          </p>
         </section>
+
+        {!useAdvancedRoles ? (
+          <>
+            {/* Simple Roles */}
+            <section>
+              <h3 className="text-lg font-semibold text-gray-800 mb-4 flex items-center">
+                <Briefcase className="h-5 w-5 mr-2 text-green-500" />
+                Funções Disponíveis *
+              </h3>
+              <div className="space-y-3">
+                {roles.map((role: string, index: number) => (
+                  <div key={index} className="flex items-center space-x-2">
+                    <input
+                      type="text"
+                      value={role}
+                      onChange={(e) => updateRole(index, e.target.value)}
+                      className={`flex-1 px-4 py-2 border rounded-lg focus:ring-2 focus:border-transparent ${getBorderClass('roles')}`}
+                      placeholder="Ex: Coordenador de equipe, Recepcionista, etc."
+                    />
+                    {roles.length > 1 && (
+                      <button
+                        type="button"
+                        onClick={() => removeRole(index)}
+                        className="px-3 py-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors text-sm"
+                      >
+                        Remover
+                      </button>
+                    )}
+                  </div>
+                ))}
+                <ErrorMessage message={errors.roles} />
+                <button
+                  type="button"
+                  onClick={addRole}
+                  className="text-green-600 hover:text-green-700 font-medium text-sm pt-2"
+                >
+                  + Adicionar Função
+                </button>
+              </div>
+            </section>
+          </>
+        ) : (
+          <>
+            {/* Advanced Roles with Responsibilities */}
+            <section>
+              <h3 className="text-lg font-semibold text-gray-800 mb-4 flex items-center">
+                <Briefcase className="h-5 w-5 mr-2 text-green-500" />
+                Funções Detalhadas *
+              </h3>
+              <div className="space-y-6">
+                {rolesWithDetails.map((role, roleIndex) => (
+                  <div key={roleIndex} className="border border-gray-300 rounded-lg p-4 bg-gray-50">
+                    <div className="flex items-start justify-between mb-4">
+                      <div className="flex-1 space-y-3">
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                          <div className="md:col-span-2">
+                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                              Nome da Função *
+                            </label>
+                            <input
+                              type="text"
+                              value={role.name}
+                              onChange={(e) => updateAdvancedRole(roleIndex, 'name', e.target.value)}
+                              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                              placeholder="Ex: Coordenador de equipe"
+                            />
+                          </div>
+                          <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                              Máx. Voluntários *
+                            </label>
+                            <input
+                              type="number"
+                              min="1"
+                              value={role.maxVolunteers}
+                              onChange={(e) => updateAdvancedRole(roleIndex, 'maxVolunteers', parseInt(e.target.value) || 1)}
+                              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                            />
+                          </div>
+                        </div>
+
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-2">
+                            Responsabilidades *
+                          </label>
+                          <div className="space-y-2">
+                            {role.responsibilities.map((resp, respIndex) => (
+                              <div key={respIndex} className="flex items-center space-x-2">
+                                <input
+                                  type="text"
+                                  value={resp}
+                                  onChange={(e) => updateRoleResponsibility(roleIndex, respIndex, e.target.value)}
+                                  className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
+                                  placeholder="Ex: Auxiliar na organização do material"
+                                />
+                                {role.responsibilities.length > 1 && (
+                                  <button
+                                    type="button"
+                                    onClick={() => removeRoleResponsibility(roleIndex, respIndex)}
+                                    className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                                  >
+                                    <XCircle className="h-4 w-4" />
+                                  </button>
+                                )}
+                              </div>
+                            ))}
+                            <button
+                              type="button"
+                              onClick={() => addRoleResponsibility(roleIndex)}
+                              className="text-blue-600 hover:text-blue-700 font-medium text-xs"
+                            >
+                              + Adicionar Responsabilidade
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+
+                      {rolesWithDetails.length > 1 && (
+                        <button
+                          type="button"
+                          onClick={() => removeAdvancedRole(roleIndex)}
+                          className="ml-4 p-2 text-red-600 hover:bg-red-100 rounded-lg transition-colors"
+                        >
+                          <XCircle className="h-5 w-5" />
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                ))}
+                <button
+                  type="button"
+                  onClick={addAdvancedRole}
+                  className="w-full py-3 border-2 border-dashed border-gray-300 rounded-lg text-green-600 hover:border-green-500 hover:bg-green-50 font-medium transition-colors"
+                >
+                  + Adicionar Nova Função
+                </button>
+              </div>
+            </section>
+          </>
+        )}
 
         {/* Responsibilities */}
         <section>
