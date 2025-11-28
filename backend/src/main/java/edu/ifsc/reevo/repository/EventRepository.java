@@ -13,7 +13,9 @@ public interface EventRepository extends JpaRepository<Event, Long> {
 
     List<Event> findByActiveTrue();
 
-    @Query("SELECT e FROM Event e WHERE e.startDate > :now AND e.active = true AND e.completed = false")
+    List<Event> findByActiveTrueAndCompletedFalse();
+
+    @Query("SELECT e FROM Event e WHERE e.startDate > CURRENT_TIMESTAMP AND e.active = true AND e.completed = false")
     List<Event> findUpcomingEvents();
 
     List<Event> findByOrganizationOrganizationId(Long organizationId);

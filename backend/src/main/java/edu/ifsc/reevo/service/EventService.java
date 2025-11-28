@@ -80,6 +80,11 @@ public class EventService {
         return this.findByEventId(eventId);
     }
 
+    public List<Event> getAllActiveEvents() {
+        log.info("GETTING ALL ACTIVE EVENTS");
+        return eventRepository.findByActiveTrueAndCompletedFalse();
+    }
+
     public List<Event> getActiveEvents() {
         log.info("GETTING ACTIVE EVENTS");
         return eventRepository.findByActiveTrue();

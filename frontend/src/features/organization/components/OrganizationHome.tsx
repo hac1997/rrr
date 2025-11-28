@@ -25,6 +25,7 @@ const OrganizationHome: React.FC<OrganizationHomeProps> = ({ onLogout }) => {
   const [currentView, setCurrentView] = useState<ViewType>('dashboard');
   const [orgProfile, setOrgProfile] = useState<OrganizationProfile | null>(null);
   const [loading, setLoading] = useState(true);
+  const [editingEvent, setEditingEvent] = useState<OrgEventSummary | null>(null);
 
   const fetchOrgData = async () => {
     if (user?.id) {
@@ -43,6 +44,7 @@ const OrganizationHome: React.FC<OrganizationHomeProps> = ({ onLogout }) => {
 
   useEffect(() => {
     fetchOrgData();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user]);
 
   const handleLogout = () => {
@@ -58,6 +60,15 @@ const OrganizationHome: React.FC<OrganizationHomeProps> = ({ onLogout }) => {
     hoursGenerated: orgProfile.stats.hoursGenerated
   } : null;
 
+  const menuItems = [
+    { id: 'dashboard' as ViewType, label: 'Painel Inicial', icon: Target },
+    { id: 'create-event' as ViewType, label: 'Cadastrar Evento', icon: Plus },
+    { id: 'open-events' as ViewType, label: 'Meus Eventos', icon: Calendar },
+    { id: 'closed-events' as ViewType, label: 'Eventos Encerrados', icon: XCircle },
+    { id: 'statistics' as ViewType, label: 'Estatísticas', icon: TrendingUp },
+    { id: 'settings' as ViewType, label: 'Configurações', icon: Settings },
+  ];
+
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-screen bg-gray-50">
@@ -67,10 +78,6 @@ const OrganizationHome: React.FC<OrganizationHomeProps> = ({ onLogout }) => {
   }
 
   if (!orgData) {
-    // Fallback if no org data found (e.g. new org or error)
-    // For now, we can show a message or redirect.
-    // Or we can keep using mock data for development if backend is not ready?
-    // But backend IS ready. So let's show a message.
     return (
       <div className="flex items-center justify-center min-h-screen bg-gray-50">
         <div className="text-center">
@@ -81,17 +88,6 @@ const OrganizationHome: React.FC<OrganizationHomeProps> = ({ onLogout }) => {
       </div>
     );
   }
-
-  const menuItems = [
-    { id: 'dashboard' as ViewType, label: 'Painel Inicial', icon: Target },
-    { id: 'create-event' as ViewType, label: 'Cadastrar Evento', icon: Plus },
-    { id: 'open-events' as ViewType, label: 'Meus Eventos', icon: Calendar },
-    { id: 'closed-events' as ViewType, label: 'Eventos Encerrados', icon: XCircle },
-    { id: 'statistics' as ViewType, label: 'Estatísticas', icon: TrendingUp },
-    { id: 'settings' as ViewType, label: 'Configurações', icon: Settings },
-  ];
-
-  const [editingEvent, setEditingEvent] = useState<OrgEventSummary | null>(null);
 
   const renderContent = () => {
     switch (currentView) {

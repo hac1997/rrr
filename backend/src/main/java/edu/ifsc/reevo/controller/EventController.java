@@ -8,12 +8,24 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/events")
 @RequiredArgsConstructor
 public class EventController {
 
     private final EventService eventService;
+
+    @GetMapping
+    public ResponseEntity<List<Event>> getAllActiveEvents() {
+        return ResponseEntity.ok(eventService.getAllActiveEvents());
+    }
+
+    @GetMapping("/{eventId}")
+    public ResponseEntity<Event> getEventById(@PathVariable Long eventId) {
+        return ResponseEntity.ok(eventService.getEventById(eventId));
+    }
 
     @PostMapping
     public ResponseEntity<Event> addEvent(@Valid @RequestBody EventRequestDTO requestDTO) {
