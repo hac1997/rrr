@@ -1,0 +1,61 @@
+spring:
+  application:
+    name: REVO
+  jpa:
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
+    show-sql: true
+    hibernate:
+      ddl-auto: update
+  datasource:
+    driver-class-name: org.postgresql.Driver
+    username: aluno
+    password: aluno
+    url: jdbc:postgresql://localhost:5432/reevo_db
+  security:
+    oauth2:
+      client:
+        registration:
+          google:
+            client-id: 67340177667-knsm4sfbeig8fltpmt24menn852jfv54.apps.googleusercontent.com
+            client-secret: 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
+            scope:
+              - email
+              - profile
+  sql:
+    init:
+      mode: always
+      platform: postgresql
+      continue-on-error: true
+      schema-locations: classpath:schema.sql
+      data-locations: classpath:data.sql
+management:
+  endpoints:
+    web:
+      exposure:
+        include: '*'
+    
+
+  devtools:
+    livereload:
+      enabled: true
+
+logging:
+  level:
+    root: INFO
+    org.springframework.web: DEBUG
+
+app:
+  email_adress: jessericardorogerio@gmail.com
+
+application:
+  security:
+    jwt:
+      secret-key: 404E635266556A586E3272357538782F413F4428472B4B6250645367566B5970
+      expiration: 86400000
+      refresh-token:
+        expiration: 604800000
+
+server:
+  port: 8080
+  servlet:
+    context-path: /api/v1

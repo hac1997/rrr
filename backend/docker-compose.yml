@@ -1,0 +1,16 @@
+services:
+  postgres_db:
+    image: postgres:15.3
+    container_name: postgres_container
+    restart: always
+    environment:
+      POSTGRES_DB: reevo_db
+      POSTGRES_USER: aluno
+      POSTGRES_PASSWORD: aluno
+    ports:
+      - "5432:5432"
+    volumes:
+      - db_data:/var/lib/postgresql/data
+
+volumes:
+  db_data:

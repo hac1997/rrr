@@ -1,0 +1,40 @@
+Backend: Java Spring Boot
+Frontend: Next React
+soluções para otimização de prompt e do uso de tokens de seus agentes de IA. 
+Sua tarefa agora é estruturar uma série de requisitos para que estejam separados por contexto, com tasks claras e objetivas, para que seus agentes de IA possam ter a melhor performance ao mesmo tempo que consomem menos tokens.Você é um especialista em IA Sênior, conceituado no mercado por trazer as melhores 
+
+
+ Considere que os prompts serão utilizados na IDE google antigravity, com diversos agentes especializados (crie o prompt para o agente também) 
+
+
+
+
+a implementar:
+1. Analisar possíveis problemas de desempenho na aplicação, tanto no frontend, que demora um pouco pra carregar a página, quanto no backend
+2. No feed, se o usuário não estiver logado, não deve aparecer uma tela de loading, mas ser redirecionado para a página de login
+3. Melhorar a UI das páginas feed e dashboard e de todos os seus componentes, bem como analisar os aspectos de acessibilidade e responsividade da página. Remover os alerts do site. Dashboard muito grande -> 
+4. Criar uma “página da organização” ou “perfil”. A ideia é criar uma página de apresentação da organização. Seria uma página “sobre nós”. Talvez incluir informações, como “quem somos”, “missão”, foto de perfil, entre outras coisas. Também deve ser exibido o histórico de eventos da organização. 
+5. Na view de cada evento, deve aparecer o nome da organização. Esse nome será um link que abre um pop com informações básicas da organização (breve descrição, avaliação, ativa desde…). Dentro desse pop up deve aparecer uma opção para redirecionar para a página da organização.
+6. Cada evento vai ter associado um view. A ideia é que voluntários e até a própria ou outras organizações possam comentar dentro da página de cada evento. Analise a implementação disso, se já não existe, se não, implemente-a. Os comentários devem ser exibidos na view do evento. 
+7. Na hora de criar um evento adicionar um campo pra adicionar imagens e um botão preview pra mostrar como vai ficar a view do evento.
+8. Notificações automáticas aos voluntários via aplicativo, e-mail e SMS/WhatsApp (RF07, RF08, RF09). -> Jessé está implementando
+9. Incluir um feed de eventos abertos na página inicial, sem a necessidade de logar. Esse feed deve ser exibido na landingpage, preferencialmente como se fosse um carrousel. Deve ser baseado em eventos reais cadastrados na aplicação.
+10. Página da Organização (dashboard) está com dados mockados. A ideia é que as informações sejam puxadas do backend e sejam usadas pra preencher o pront, do mesmo modo que é feito com a página do usuário (feed). Por exemplo, na página Estatísticas do dashboard, temos que os dados estão totalmente mockados. Para desmockar eu criei um arquivo map.txt pra mapear os dados que estão sendo mockeados. Analise esse arquivo como pontapé inicial e sugestão.
+11. Analise a página feed e verifique quais informações estão ainda mockadas na página. 
+12. Em Dashboard (página da organização) temos a  aba eventos abertos. Vamos mudar o nome dessa aba para “meus eventos”. Essa aba está mockada, as coisas que aparecem a maioria está hardcoded. Nela falta implementar a opçao de editar eventos (que já está prevista no front, mas está incompleta, inclusive na integração do backend). Também precisamos implementar as opções “cancelar evento” e “encerrar e pontuar”, que estão previstos nessa página. Ainda em eventos abertos temos a opção de buscar voluntários no frontend: acrescentar a opção em Localização o estado para pré-filtrar.
+13. Em Dashboard (página da organização) temos a aba eventos encerrados: temos um botão “ver detalhes” não implementado. Temos tambem “ver relatório” não implementado. E temos “ver certificados”. 
+14. Considere o seguinte caso de uso: A organização, no momento que cria um evento, vai definir as funções definidas, as atribuições e a quantidade de voluntários para a função -> Usuários se cadastram no evento para função X -> Posteriormente, dentro da view do evento, a organização vai poder criar um grupo, onde pode definir: voluntários, horários. Percebi que no momento que no front associado  à criação do evento, temos a caixa de texto para preencher as “funções disponíveis” e “atribuições e responsabilidades”. Esses campos estão “separados” no front. A ideia é que para cada !função disponível” esteja vinculada suas “atribuições e responsabilidades”. Além disso, temos que associar um número máximo de voluntários para cada voluntário (e incluir um campo “sem número máximo de voluntários” ou algo do tipo).
+15. Mencionamos a possibilidade da organização criar “grupos de voluntários” dentro dos eventos. A ideia é que a view do evento apareça a opção criar grupo. Esse grupo deve ter: nome, descrição, voluntários associados, e outros campos que você julgar necessário. A organização deve ser capaz de gerenciar seus grupos, inclusive incluindo ou excluindo voluntários, deletando os grupos, etc…
+16. Ainda em Dashboard, temos a possibilidade de geração de relatórios de participação dos voluntários para cada evento. Analise que informações iremos gerar nesse relatório e como gerar esse relatório (gerar um pdf)
+
+
+Faça as implementações acima seguindo as melhores práticas de programação e analisando o que atualmente já temos implementado no backend e no frontend.
+
+
+Após terminar as implementações acima, analise tanto o backend quanto o frontend para identificar bloatware: modelos não usados, atributos nunca acessados, pedaços de código repetidos ou nunca usados, endpoints não acessados.
+
+
+Por fim, para evitar problemas de compatibilidade entre o backend e o banco de dados, atualize o data.sql e o schema.sql. Tome cuidado para no schema.sql criar os tables seguindo a ordem certa de dependência. 
+
+
+Implemente os testes no frontend e no backend. Tanto o front quanto o backend devem estar com a cobertura de 90% do código.
