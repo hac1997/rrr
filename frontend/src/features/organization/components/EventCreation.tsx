@@ -52,22 +52,46 @@ const EventCreation: React.FC<EventCreationProps> = ({ onSuccess, eventToEdit })
   const [isDragging, setIsDragging] = useState(false);
 
   useEffect(() => {
-    if (eventToEdit) {
-      setFormData({
-        title: eventToEdit.title,
-        category: eventToEdit.category,
-        description: '', // Description might not be in summary, need full details? Assuming summary has enough or we fetch details.
-        objectives: '',
-        benefits: '',
-        maxVolunteers: eventToEdit.maxVolunteers.toString(),
-        location: eventToEdit.location,
-        address: '',
-        city: '',
-        state: ''
-      });
-      // Note: OrgEventSummary is limited. Ideally we should fetch full event details here if needed.
-      // For now we populate what we have.
-    }
+    const fetchEventDetails = async () => {
+      if (eventToEdit) {
+        try {
+          const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080'}/events/${eventToEdit.id}`);
+          if (response.ok) {
+            const fullEvent = await response.json();
+            setFormData({
+              title: fullEvent.title || eventToEdit.title,
+              category: eventToEdit.category,
+              description: fullEvent.description || '',
+              objectives: '',
+              benefits: '',
+              maxVolunteers: fullEvent.volunteerSlots?.toString() || eventToEdit.maxVolunteers.toString(),
+              location: eventToEdit.location,
+              address: fullEvent.address?.street || '',
+              city: fullEvent.address?.city || '',
+              state: fullEvent.address?.state || ''
+            });
+          } else {
+            // Fallback to summary data if fetch fails
+            setFormData({
+              title: eventToEdit.title,
+              category: eventToEdit.category,
+              description: '',
+              objectives: '',
+              benefits: '',
+              maxVolunteers: eventToEdit.maxVolunteers.toString(),
+              location: eventToEdit.location,
+              address: '',
+              city: '',
+              state: ''
+            });
+          }
+        } catch (error) {
+          console.error('Error fetching event details:', error);
+          toast.error('Erro ao carregar detalhes do evento.');
+        }
+      }
+    };
+    fetchEventDetails();
   }, [eventToEdit]);
 
   const categories = [

@@ -30,6 +30,8 @@ public class Organization extends BaseEntity {
     private String name;
     @Column(length = 500)
     private String description;
+    @Column(length = 1000)
+    private String mission;
     @Column(nullable = false, length = 150)
     private String email;
     @Column(length = 20)
@@ -37,6 +39,7 @@ public class Organization extends BaseEntity {
     @Column(length = 200)
     private String website;
     private String logoImageUrl;
+    private String bannerImageUrl;
     @Embedded
     private Address address;
 
