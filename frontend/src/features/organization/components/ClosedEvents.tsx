@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import { Calendar, MapPin, Users, Award, Search, Eye, Download, TrendingUp } from 'lucide-react';
+import { Calendar, MapPin, Users, Award, Search, Eye, Download, TrendingUp, CheckCircle, XCircle, FileText } from 'lucide-react';
 import { EVENT_CATEGORIES } from '@/lib/services/orgData';
 import { OrgEventSummary } from '@/lib/types';
 import { toast } from 'sonner';
@@ -10,11 +10,23 @@ interface ClosedEventsProps {
   events: OrgEventSummary[];
 }
 
+interface VolunteerCertificate {
+  id: number;
+  volunteerName: string;
+  email: string;
+  hours: number;
+  status: 'issued' | 'pending';
+  issueDate?: string;
+  certificateCode?: string;
+}
+
 const ClosedEvents: React.FC<ClosedEventsProps> = ({ events }) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [filterCategory, setFilterCategory] = useState('all');
   const [selectedEvent, setSelectedEvent] = useState<OrgEventSummary | null>(null);
   const [showDetailsModal, setShowDetailsModal] = useState(false);
+  const [showCertificatesModal, setShowCertificatesModal] = useState(false);
+  const [certificatesForEvent, setCertificatesForEvent] = useState<VolunteerCertificate[]>([]);
 
   const categories = EVENT_CATEGORIES;
 
@@ -39,8 +51,21 @@ const ClosedEvents: React.FC<ClosedEventsProps> = ({ events }) => {
     toast.success('Relatório baixado com sucesso!');
   };
 
-  const handleViewCertificates = (id: number) => {
-    toast.info('Visualização de certificados em breve.');
+  const handleViewCertificates = (event: OrgEventSummary) => {
+    // Mock certificate data - in production, fetch from backend
+    const mockCertificates: VolunteerCertificate[] = Array.from({ length: event.volunteers }, (_, i) => ({
+      id: i + 1,
+      volunteerName: `Voluntário ${i + 1}`,
+      email: `voluntario${i + 1}@example.com`,
+      hours: event.hours,
+      status: Math.random() > 0.2 ? 'issued' : 'pending',
+      issueDate: Math.random() > 0.2 ? event.date : undefined,
+      certificateCode: Math.random() > 0.2 ? `CERT-${event.id}-${i + 1}` : undefined
+    }));
+
+    setCertificatesForEvent(mockCertificates);
+    setSelectedEvent(event);
+    setShowCertificatesModal(true);
   };
 
   return (
@@ -183,7 +208,7 @@ const ClosedEvents: React.FC<ClosedEventsProps> = ({ events }) => {
                     Relatório
                   </button>
                   <button
-                    onClick={() => handleViewCertificates(event.id)}
+                    onClick={() => handleViewCertificates(event)}
                     className="px-4 py-2 bg-primary text-white rounded-lg hover:shadow-lg transition-all duration-200 flex items-center font-medium"
                   >
                     <Award className="h-4 w-4 mr-2" />
@@ -315,13 +340,172 @@ const ClosedEvents: React.FC<ClosedEventsProps> = ({ events }) => {
                 </button>
                 <button
                   onClick={() => {
-                    handleViewCertificates(selectedEvent.id);
+                    handleViewCertificates(selectedEvent);
                     setShowDetailsModal(false);
                   }}
                   className="px-6 py-2 bg-primary text-white rounded-lg hover:shadow-lg transition-all duration-200 flex items-center font-medium"
                 >
                   <Award className="h-4 w-4 mr-2" />
                   Ver Certificados
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Certificates Modal */}
+      {showCertificatesModal && selectedEvent && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-xl max-w-5xl w-full max-h-[90vh] overflow-y-auto">
+            <div className="sticky top-0 bg-white border-b border-gray-200 p-6 flex justify-between items-center">
+              <div>
+                <h2 className="text-2xl font-bold text-gray-800">Certificados do Evento</h2>
+                <p className="text-gray-600 text-sm mt-1">{selectedEvent.title}</p>
+              </div>
+              <button
+                onClick={() => setShowCertificatesModal(false)}
+                className="text-gray-400 hover:text-gray-600 text-2xl leading-none"
+              >
+                ×
+              </button>
+            </div>
+
+            <div className="p-6">
+              {/* Summary Stats */}
+              <div className="grid grid-cols-3 gap-4 mb-6">
+                <div className="bg-green-50 rounded-lg p-4 border border-green-200">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-sm text-gray-600 mb-1">Emitidos</p>
+                      <p className="text-2xl font-bold text-green-600">
+                        {certificatesForEvent.filter(c => c.status === 'issued').length}
+                      </p>
+                    </div>
+                    <CheckCircle className="h-10 w-10 text-green-500" />
+                  </div>
+                </div>
+                <div className="bg-yellow-50 rounded-lg p-4 border border-yellow-200">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-sm text-gray-600 mb-1">Pendentes</p>
+                      <p className="text-2xl font-bold text-yellow-600">
+                        {certificatesForEvent.filter(c => c.status === 'pending').length}
+                      </p>
+                    </div>
+                    <XCircle className="h-10 w-10 text-yellow-500" />
+                  </div>
+                </div>
+                <div className="bg-blue-50 rounded-lg p-4 border border-blue-200">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-sm text-gray-600 mb-1">Total</p>
+                      <p className="text-2xl font-bold text-blue-600">
+                        {certificatesForEvent.length}
+                      </p>
+                    </div>
+                    <Award className="h-10 w-10 text-blue-500" />
+                  </div>
+                </div>
+              </div>
+
+              {/* Certificates List */}
+              <div className="space-y-3">
+                <h3 className="text-lg font-semibold text-gray-800 mb-3">Lista de Certificados</h3>
+                {certificatesForEvent.map((cert) => (
+                  <div
+                    key={cert.id}
+                    className={`border rounded-lg p-4 flex items-center justify-between ${
+                      cert.status === 'issued' ? 'bg-green-50 border-green-200' : 'bg-yellow-50 border-yellow-200'
+                    }`}
+                  >
+                    <div className="flex-1">
+                      <div className="flex items-center space-x-3 mb-2">
+                        <div className="w-10 h-10 bg-gradient-to-br from-primary to-secondary rounded-full flex items-center justify-center text-white font-bold">
+                          {cert.volunteerName.charAt(0)}
+                        </div>
+                        <div>
+                          <h4 className="font-semibold text-gray-800">{cert.volunteerName}</h4>
+                          <p className="text-sm text-gray-600">{cert.email}</p>
+                        </div>
+                      </div>
+                      <div className="grid grid-cols-3 gap-4 text-sm">
+                        <div>
+                          <p className="text-gray-500">Horas</p>
+                          <p className="font-medium text-gray-800">{cert.hours}h</p>
+                        </div>
+                        {cert.issueDate && (
+                          <div>
+                            <p className="text-gray-500">Data de Emissão</p>
+                            <p className="font-medium text-gray-800">{cert.issueDate}</p>
+                          </div>
+                        )}
+                        {cert.certificateCode && (
+                          <div>
+                            <p className="text-gray-500">Código</p>
+                            <p className="font-medium text-gray-800 font-mono text-xs">{cert.certificateCode}</p>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+
+                    <div className="flex items-center space-x-2 ml-4">
+                      {cert.status === 'issued' ? (
+                        <>
+                          <span className="px-3 py-1 bg-green-100 text-green-700 rounded-full text-xs font-medium flex items-center">
+                            <CheckCircle className="h-3 w-3 mr-1" />
+                            Emitido
+                          </span>
+                          <button
+                            onClick={() => toast.success('Download iniciado!')}
+                            className="px-3 py-2 bg-white border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors flex items-center text-sm"
+                          >
+                            <Download className="h-4 w-4 mr-1" />
+                            Baixar
+                          </button>
+                          <button
+                            onClick={() => toast.info('Visualização em nova aba')}
+                            className="px-3 py-2 bg-primary text-white rounded-lg hover:shadow-lg transition-all duration-200 flex items-center text-sm"
+                          >
+                            <Eye className="h-4 w-4 mr-1" />
+                            Ver
+                          </button>
+                        </>
+                      ) : (
+                        <>
+                          <span className="px-3 py-1 bg-yellow-100 text-yellow-700 rounded-full text-xs font-medium flex items-center">
+                            <XCircle className="h-3 w-3 mr-1" />
+                            Pendente
+                          </span>
+                          <button
+                            onClick={() => toast.success('Certificado emitido com sucesso!')}
+                            className="px-3 py-2 bg-primary text-white rounded-lg hover:shadow-lg transition-all duration-200 flex items-center text-sm"
+                          >
+                            <CheckCircle className="h-4 w-4 mr-1" />
+                            Emitir
+                          </button>
+                        </>
+                      )}
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              {/* Action Buttons */}
+              <div className="flex justify-end space-x-3 pt-6 mt-6 border-t border-gray-200">
+                <button
+                  onClick={() => toast.success('Todos os certificados foram baixados!')}
+                  className="px-6 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors flex items-center"
+                >
+                  <Download className="h-4 w-4 mr-2" />
+                  Baixar Todos
+                </button>
+                <button
+                  onClick={() => toast.success('Certificados pendentes emitidos!')}
+                  className="px-6 py-2 bg-primary text-white rounded-lg hover:shadow-lg transition-all duration-200 flex items-center font-medium"
+                >
+                  <CheckCircle className="h-4 w-4 mr-2" />
+                  Emitir Pendentes
                 </button>
               </div>
             </div>
