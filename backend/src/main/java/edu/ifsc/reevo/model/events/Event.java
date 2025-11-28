@@ -85,4 +85,7 @@ public class Event extends BaseEntity {
 
     @OneToMany(mappedBy = "event", cascade = CascadeType.ALL)
     private List<Benefit> benefits;
+
+    @OneToMany(mappedBy = "event", cascade = CascadeType.ALL)
+    private List<edu.ifsc.reevo.model.news.Comment> comments;
 }

@@ -29,11 +29,40 @@ const EventScoring: React.FC<EventScoringProps> = ({ event, onBack }) => {
     const attendedCount = participants.filter(p => p.attended).length;
     const certificatesCount = participants.filter(p => p.issueCertificate).length;
 
-    if (confirm(`Confirmar encerramento do evento?\n\n${attendedCount} participantes presentes\n${certificatesCount} certificados serão emitidos`)) {
+    const userConfirmed = await new Promise<boolean>((resolve) => {
+      toast(
+        <div className="flex flex-col space-y-2">
+          <p className="font-semibold">Confirmar encerramento do evento?</p>
+          <p className="text-sm">{attendedCount} participantes presentes</p>
+          <p className="text-sm">{certificatesCount} certificados serão emitidos</p>
+          <div className="flex space-x-2 mt-2">
+            <button
+              onClick={() => {
+                resolve(true);
+                toast.dismiss();
+              }}
+              className="px-4 py-2 bg-primary text-white rounded-lg text-sm"
+            >
+              Confirmar
+            </button>
+            <button
+              onClick={() => {
+                resolve(false);
+                toast.dismiss();
+              }}
+              className="px-4 py-2 bg-gray-300 text-gray-700 rounded-lg text-sm"
+            >
+              Cancelar
+            </button>
+          </div>
+        </div>,
+        { duration: 10000 }
+      );
+    });
+
+    if (userConfirmed) {
       setIsSubmitting(true);
       try {
-        // Note: Currently backend only supports closing the event. 
-        // Participant scores would need a separate endpoint or an update to closeEvent.
         await closeEvent(event.id);
         toast.success('Evento encerrado com sucesso! Pontuações atribuídas e certificados emitidos.');
         onBack();

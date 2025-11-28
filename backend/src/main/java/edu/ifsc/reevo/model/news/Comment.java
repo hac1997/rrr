@@ -1,6 +1,7 @@
 package edu.ifsc.reevo.model.news;
 
 import edu.ifsc.reevo.model.User;
+import edu.ifsc.reevo.model.events.Event;
 import edu.ifsc.reevo.model.helper.BaseEntity;
 import jakarta.persistence.*;
 import lombok.*;
@@ -30,6 +31,10 @@ public class Comment extends BaseEntity {
     @ManyToOne
     @JoinColumn(name = "news_id")
     private News news;
+
+    @ManyToOne
+    @JoinColumn(name = "event_id")
+    private Event event;
 
     @ManyToOne
     @JoinColumn(name = "parent_comment_id")
