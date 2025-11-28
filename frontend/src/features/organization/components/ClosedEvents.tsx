@@ -13,6 +13,8 @@ interface ClosedEventsProps {
 const ClosedEvents: React.FC<ClosedEventsProps> = ({ events }) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [filterCategory, setFilterCategory] = useState('all');
+  const [selectedEvent, setSelectedEvent] = useState<OrgEventSummary | null>(null);
+  const [showDetailsModal, setShowDetailsModal] = useState(false);
 
   const categories = EVENT_CATEGORIES;
 
@@ -28,8 +30,9 @@ const ClosedEvents: React.FC<ClosedEventsProps> = ({ events }) => {
   const totalHours = events.reduce((sum, e) => sum + (e.volunteers * e.hours), 0);
   const totalCertificates = events.reduce((sum, e) => sum + e.volunteers, 0); // Assuming all attended get certs
 
-  const handleViewDetails = (id: number) => {
-    toast.info('Detalhes do evento em breve.');
+  const handleViewDetails = (event: OrgEventSummary) => {
+    setSelectedEvent(event);
+    setShowDetailsModal(true);
   };
 
   const handleDownloadReport = (id: number) => {
@@ -166,7 +169,7 @@ const ClosedEvents: React.FC<ClosedEventsProps> = ({ events }) => {
                 {/* Action Buttons */}
                 <div className="flex justify-end space-x-3 pt-4 border-t border-gray-200">
                   <button
-                    onClick={() => handleViewDetails(event.id)}
+                    onClick={() => handleViewDetails(event)}
                     className="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors flex items-center"
                   >
                     <Eye className="h-4 w-4 mr-2" />
@@ -199,6 +202,132 @@ const ClosedEvents: React.FC<ClosedEventsProps> = ({ events }) => {
           </div>
         )}
       </div>
+
+      {/* Event Details Modal */}
+      {showDetailsModal && selectedEvent && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-xl max-w-4xl w-full max-h-[90vh] overflow-y-auto">
+            <div className="sticky top-0 bg-white border-b border-gray-200 p-6 flex justify-between items-center">
+              <h2 className="text-2xl font-bold text-gray-800">Detalhes do Evento</h2>
+              <button
+                onClick={() => setShowDetailsModal(false)}
+                className="text-gray-400 hover:text-gray-600 text-2xl leading-none"
+              >
+                ×
+              </button>
+            </div>
+
+            <div className="p-6 space-y-6">
+              {/* Event Header */}
+              <div>
+                <div className="flex items-center space-x-3 mb-3">
+                  <h3 className="text-3xl font-bold text-gray-900">{selectedEvent.title}</h3>
+                  <span className="px-3 py-1 bg-green-100 text-green-700 rounded-full text-sm font-medium">
+                    Concluído
+                  </span>
+                </div>
+                <div className="flex items-center space-x-4 text-gray-600">
+                  <div className="flex items-center">
+                    <Calendar className="h-5 w-5 mr-2 text-blue-500" />
+                    {selectedEvent.date}
+                  </div>
+                  <div className="flex items-center">
+                    <MapPin className="h-5 w-5 mr-2 text-green-500" />
+                    {selectedEvent.location}
+                  </div>
+                </div>
+              </div>
+
+              {/* Statistics Grid */}
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <div className="bg-blue-50 rounded-lg p-4">
+                  <Users className="h-8 w-8 text-blue-600 mb-2" />
+                  <p className="text-2xl font-bold text-gray-800">{selectedEvent.volunteers}</p>
+                  <p className="text-sm text-gray-600">Participantes</p>
+                </div>
+                <div className="bg-green-50 rounded-lg p-4">
+                  <TrendingUp className="h-8 w-8 text-green-600 mb-2" />
+                  <p className="text-2xl font-bold text-gray-800">{selectedEvent.volunteers * selectedEvent.hours}h</p>
+                  <p className="text-sm text-gray-600">Horas Geradas</p>
+                </div>
+                <div className="bg-orange-50 rounded-lg p-4">
+                  <Award className="h-8 w-8 text-primary mb-2" />
+                  <p className="text-2xl font-bold text-gray-800">{selectedEvent.volunteers}</p>
+                  <p className="text-sm text-gray-600">Certificados</p>
+                </div>
+                <div className="bg-purple-50 rounded-lg p-4">
+                  <Calendar className="h-8 w-8 text-purple-600 mb-2" />
+                  <p className="text-2xl font-bold text-gray-800">{selectedEvent.hours}h</p>
+                  <p className="text-sm text-gray-600">Duração</p>
+                </div>
+              </div>
+
+              {/* Event Information */}
+              <div className="space-y-4">
+                <div>
+                  <h4 className="text-lg font-semibold text-gray-800 mb-2">Categoria</h4>
+                  <span className="px-3 py-1 bg-gray-100 text-gray-700 rounded-full text-sm font-medium">
+                    {selectedEvent.category || 'Geral'}
+                  </span>
+                </div>
+
+                <div>
+                  <h4 className="text-lg font-semibold text-gray-800 mb-2">Taxa de Ocupação</h4>
+                  <div className="flex items-center space-x-3">
+                    <div className="flex-1 bg-gray-200 rounded-full h-3">
+                      <div
+                        className="bg-gradient-to-r from-green-500 to-green-600 h-3 rounded-full"
+                        style={{ width: `${selectedEvent.maxVolunteers > 0 ? (selectedEvent.volunteers / selectedEvent.maxVolunteers) * 100 : 0}%` }}
+                      />
+                    </div>
+                    <span className="text-sm font-semibold text-gray-700">
+                      {selectedEvent.volunteers}/{selectedEvent.maxVolunteers}
+                    </span>
+                  </div>
+                </div>
+
+                <div>
+                  <h4 className="text-lg font-semibold text-gray-800 mb-2">Avaliação Média</h4>
+                  <div className="flex items-center space-x-2">
+                    <div className="flex">
+                      {[1, 2, 3, 4, 5].map(star => (
+                        <Award
+                          key={star}
+                          className={`h-6 w-6 ${star <= (selectedEvent.rating || 0) ? 'text-yellow-400 fill-yellow-400' : 'text-gray-300'}`}
+                        />
+                      ))}
+                    </div>
+                    <span className="text-lg font-semibold text-gray-700">
+                      {selectedEvent.rating || 'N/A'}
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Action Buttons */}
+              <div className="flex justify-end space-x-3 pt-4 border-t border-gray-200">
+                <button
+                  onClick={() => handleDownloadReport(selectedEvent.id)}
+                  className="px-6 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors flex items-center"
+                >
+                  <Download className="h-4 w-4 mr-2" />
+                  Baixar Relatório
+                </button>
+                <button
+                  onClick={() => {
+                    handleViewCertificates(selectedEvent.id);
+                    setShowDetailsModal(false);
+                  }}
+                  className="px-6 py-2 bg-primary text-white rounded-lg hover:shadow-lg transition-all duration-200 flex items-center font-medium"
+                >
+                  <Award className="h-4 w-4 mr-2" />
+                  Ver Certificados
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
