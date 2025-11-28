@@ -6,16 +6,27 @@ import edu.ifsc.reevo.dto.DtoRequest.NotificationRequestDTO;
 import edu.ifsc.reevo.dto.DtoRequest.OrganizationRequestDTO;
 import edu.ifsc.reevo.dto.DtoRequest.ReportRequestDTO;
 import edu.ifsc.reevo.dto.DtoRequest.UserRequestDTO;
-import edu.ifsc.reevo.model.*;
+import edu.ifsc.reevo.model.Notification;
+import edu.ifsc.reevo.model.Organization;
+import edu.ifsc.reevo.model.Profile;
+import edu.ifsc.reevo.model.Report;
+import edu.ifsc.reevo.model.User;
 import edu.ifsc.reevo.model.enums.UserType;
 import edu.ifsc.reevo.model.events.Certificate;
 import edu.ifsc.reevo.model.events.Event;
-
+import edu.ifsc.reevo.model.helper.Tag;
+import edu.ifsc.reevo.repository.TagRepository;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
 
 
 @Service
+@RequiredArgsConstructor
 public class GeneralMapper {
+
+        private final TagRepository tagRepository;
 
     public User toUser(UserRequestDTO requestDTO, Profile profile) {
         return User.builder()
@@ -45,19 +56,33 @@ public class GeneralMapper {
                 .build();
     }
 
-    public Event toEvent(EventRequestDTO requestDTO, Organization organization) {
+
+    public Event toEvent(EventRequestDTO dto, Organization org) {
+
+        List<Tag> persistentTags = dto.tags().stream()
+                .map(t -> tagRepository.findByCode(t.code())
+                        .orElseGet(() ->
+                                tagRepository.save(
+                                        Tag.builder()
+                                                .code(t.code())
+                                                .label(t.label())
+                                                .build()
+                                )
+                        )
+                ).toList();
+
         return Event.builder()
-                .title(requestDTO.title())
-                .description(requestDTO.description())
-                .startDate(requestDTO.startDate())
-                .endDate(requestDTO.endDate())
-                .coverImageUrl(requestDTO.coverImageUrl())
-                .address(requestDTO.address())
-                .volunteerSlots(requestDTO.volunteerSlots())
-                .filledSlots(requestDTO.filledSlots())
-                .pointsReward(requestDTO.pointsReward())
-                .organization(organization)
-                .tags(requestDTO.tags())
+                .title(dto.title())
+                .description(dto.description())
+                .startDate(dto.startDate())
+                .endDate(dto.endDate())
+                .coverImageUrl(dto.coverImageUrl())
+                .address(dto.address())
+                .volunteerSlots(dto.volunteerSlots())
+                .filledSlots(dto.filledSlots())
+                .pointsReward(dto.pointsReward())
+                .organization(org)
+                .tags(persistentTags)
                 .build();
     }
 

@@ -3,7 +3,9 @@ package edu.ifsc.reevo.service;
 import edu.ifsc.reevo.dto.DtoRequest;
 import edu.ifsc.reevo.dto.DtoRequest.EventRequestDTO;
 import edu.ifsc.reevo.model.events.Event;
+import edu.ifsc.reevo.model.helper.Tag;
 import edu.ifsc.reevo.repository.EventRepository;
+import edu.ifsc.reevo.repository.TagRepository;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -19,15 +21,25 @@ public class EventService {
     private final EventRepository eventRepository;
     private final OrganizationService organizationService;
     private final GeneralMapper generalMapper;
+    private final TagRepository tagRepository;
 
     public Event addEvent(EventRequestDTO requestDTO) {
-        log.info("ADDING EVENT BY REQUEST :: {}",requestDTO);
+        log.info("ADDING EVENT BY REQUEST :: {}", requestDTO);
         if (requestDTO.startDate().isAfter(requestDTO.endDate())) {
             throw new IllegalArgumentException("START DATE CANNOT BE AFTER END DATE");
         }
         var org = organizationService.findByOrganizationId(requestDTO.organizationId());
         var event = generalMapper.toEvent(requestDTO, org);
 
+        List<Tag> resolvedTags = requestDTO.tags().stream()
+                .map(t -> tagRepository.findByCode(t.code())
+                        .orElseGet(() -> tagRepository.save(Tag.builder()
+                                .code(t.code())
+                                .label(t.label())
+                                .build())))
+                .toList();
+
+        event.setTags(resolvedTags);
         return eventRepository.save(event);
     }
 
@@ -51,20 +63,27 @@ public class EventService {
         event.setVolunteerSlots(requestDTO.volunteerSlots());
         event.setFilledSlots(requestDTO.filledSlots());
         event.setPointsReward(requestDTO.pointsReward());
-        event.setTags(requestDTO.tags());
+        List<Tag> resolvedTags = requestDTO.tags().stream()
+                .map(t -> tagRepository.findByCode(t.code())
+                        .orElseGet(() -> tagRepository.save(Tag.builder()
+                                .code(t.code())
+                                .label(t.label())
+                                .build())))
+                .toList();
 
+        event.setTags(resolvedTags);
         return event;
     }
 
     public void deactivatingEvent(Long eventId) {
-        log.info("DEACTIVATING EVENT BY ID :: {}",eventId);
+        log.info("DEACTIVATING EVENT BY ID :: {}", eventId);
         var event = this.findByEventId(eventId);
         event.setActive(false);
         eventRepository.save(event);
     }
 
     public void completeEvent(Long eventId) {
-        log.info("COMPLETING EVENT BY ID :: {}",eventId);
+        log.info("COMPLETING EVENT BY ID :: {}", eventId);
         var event = this.findByEventId(eventId);
         event.setCompleted(true);
         eventRepository.save(event);
@@ -76,7 +95,7 @@ public class EventService {
     }
 
     public Event getEventById(Long eventId) {
-        log.info("GETTING EVENT BY ID :: {}",eventId);
+        log.info("GETTING EVENT BY ID :: {}", eventId);
         return this.findByEventId(eventId);
     }
 
@@ -91,7 +110,7 @@ public class EventService {
     }
 
     public List<Event> getEventsByOrganization(Long organizationId) {
-        log.info("GETTING EVENTS BY ORGANIZATION ID :: {}",organizationId);
+        log.info("GETTING EVENTS BY ORGANIZATION ID :: {}", organizationId);
         return eventRepository.findByOrganizationOrganizationId(organizationId);
     }
 
@@ -101,8 +120,8 @@ public class EventService {
     }
 
     protected Event findByEventId(Long eventId) {
-        log.info("FINDING EVENT BY ID :: {}",eventId);
+        log.info("FINDING EVENT BY ID :: {}", eventId);
         return eventRepository.findById(eventId)
-                .orElseThrow(() -> new EntityNotFoundException("EVENT NOT FOUND WITH ID :: "+eventId));
+                .orElseThrow(() -> new EntityNotFoundException("EVENT NOT FOUND WITH ID :: " + eventId));
     }
 }

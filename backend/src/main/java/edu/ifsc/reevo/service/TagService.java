@@ -8,6 +8,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import java.util.List;
+import java.util.Optional;
 
 @Slf4j
 @Service
@@ -45,7 +46,7 @@ public class TagService {
         return this.findByTagId(tagId);
     }
 
-    public List<Tag> getTagsByCode(String code) {
+    public Optional<Tag> getTagsByCode(String code) {
         log.info("GETTING TAGS BY CODE :: {}",code);
         return tagRepository.findByCode(code);
     }

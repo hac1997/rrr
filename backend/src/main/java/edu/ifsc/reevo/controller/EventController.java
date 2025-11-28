@@ -1,7 +1,9 @@
 package edu.ifsc.reevo.controller;
 
 import edu.ifsc.reevo.dto.DtoRequest.EventRequestDTO;
+import edu.ifsc.reevo.dto.DtoRequest.EventResponseDTO;
 import edu.ifsc.reevo.model.events.Event;
+import edu.ifsc.reevo.model.helper.Tag;
 import edu.ifsc.reevo.service.EventService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -28,15 +30,48 @@ public class EventController {
     }
 
     @PostMapping
-    public ResponseEntity<Event> addEvent(@Valid @RequestBody EventRequestDTO requestDTO) {
-        return ResponseEntity.ok(eventService.addEvent(requestDTO));
+    public ResponseEntity<EventResponseDTO> addEvent(@Valid @RequestBody EventRequestDTO requestDTO) {
+
+        var event = eventService.addEvent(requestDTO);
+
+        var dto = new EventResponseDTO(
+                event.getEventId(),
+                event.getTitle(),
+                event.getDescription(),
+                event.getStartDate(),
+                event.getEndDate(),
+                event.getCoverImageUrl(),
+                event.getAddress(),
+                event.getVolunteerSlots(),
+                event.getFilledSlots(),
+                event.getPointsReward(),
+                event.getOrganization().getOrganizationId(),
+                event.getTags().stream().map(Tag::getCode).toList());
+
+        return ResponseEntity.ok(dto);
     }
 
     @PutMapping("/{eventId}")
-    public ResponseEntity<Event> updateEvent(
+    public ResponseEntity<EventResponseDTO> updateEvent(
             @PathVariable Long eventId,
             @Valid @RequestBody EventRequestDTO requestDTO) {
-        return ResponseEntity.ok(eventService.updateEvent(requestDTO, eventId));
+        var event = eventService.updateEvent(requestDTO, eventId);
+
+        var dto = new EventResponseDTO(
+                event.getEventId(),
+                event.getTitle(),
+                event.getDescription(),
+                event.getStartDate(),
+                event.getEndDate(),
+                event.getCoverImageUrl(),
+                event.getAddress(),
+                event.getVolunteerSlots(),
+                event.getFilledSlots(),
+                event.getPointsReward(),
+                event.getOrganization().getOrganizationId(),
+                event.getTags().stream().map(Tag::getCode).toList());
+
+        return ResponseEntity.ok(dto);
     }
 
     @PatchMapping("/{eventId}/deactivate")
@@ -50,6 +85,5 @@ public class EventController {
         eventService.completeEvent(eventId);
         return ResponseEntity.ok().build();
     }
-
 
 }

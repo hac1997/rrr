@@ -1,0 +1,177 @@
+
+1 - ERRO LOG FRONT:
+Failed to fetch events
+
+src\lib\services\event.service.ts (13:19) @ getUpcomingEvents
+
+
+  11 |
+  12 |         if (!response.ok) {
+> 13 |             throw new Error('Failed to fetch events');
+     |                   ^
+  14 |         }
+  15 |
+  16 |         const data = await response.json();
+Call Stack
+2
+
+getUpcomingEvents
+src\lib\services\event.service.ts (13:19)
+async fetchData
+src\components\ui\UpcomingEvents.tsx (31:22)
+
+
+
+2 - No front, no step de cadastrar, no campo para indicar o estado, fazer uma lista suspensa.
+
+3 - validar o cpf no front na página de cadastro
+
+4 - eero conform log do front:
+
+Console Error
+
+
+Failed to search events
+
+src\lib\services\event.service.ts (97:19) @ searchEvents
+
+
+   95 |
+   96 |         if (!response.ok) {
+>  97 |             throw new Error('Failed to search events');
+      |                   ^
+   98 |         }
+   99 |
+  100 |         const data = await response.json();
+Call Stack
+2
+
+searchEvents
+src\lib\services\event.service.ts (97:19)
+async EventSearch.useEffect.fetchEvents
+src\features\volunteer\components\EventSearch.tsx (34:22)
+
+5 - NO FRONT, na página feed do voluntário, temos a estatística "Ranking" que está mockada (pro usuário, sempre vai parecer que ele está em 12° do ranking). Percebo, por exemplo
+
+6 - na página do usuário (feed), quando clicamos em sair, automaticamente o cockie de autenticação deve ser deletado.
+
+7 - na página do usuário (feed), incluir uma página "perfil". Perceba que temos o entity profile, que tem como campos algumas informações como:
+- city:
+- state;
+- zip_code;
+- bio
+- headline 
+- description
+- profession
+- profile_image_url
+- completed_events
+- level
+- points
+- public_profile
+- total_volunteer_hours
+- profile_url
+
+Nós temos alguns detalhes pra resolver. O primeiro deles é que as informações como city (cidade) e state (estado) não são passadas para a table profiles quando um usuário é cadastrado no sistema (isso é, é atualizado a table users, mas não a table profile). Um outro detalhe é que, pra cada user deve haver um profile. Atualize o service UserService pra quando criar um usuário já criar um profile associado. Se for o caso, altere o model profile pra permitir que alguns elementos da coluna sejam null. O Id do profile deve ser o mesmo id do usuário e o campo profile_url deve ser gerado automaticamente na criação do profile e deve ser único pra cada usuário.
+Ainda, como dito, na página do usuário deve haver a opção "editar perfil". Essa opção deve poder permitir editar os seguintes campos da table profile:
+- city:
+- state;
+- zip_code;
+- bio
+- headline 
+- description
+- profession
+- profile_image_url
+- public_profile
+- total_volunteer_hours
+
+e os seguintes campos da table user:
+- firstname;
+- lastname;
+- email;
+- phone;
+- passwordHash;
+
+o passwordHash é o hash do novo password. Naturalmente a aplicação teria que validar a senha antigo: só altera a senha se o usuário botar a senha atual certa.
+
+
+problema no backend:
+
+
+Request URL
+http://localhost:8080/api/v1/events
+Request Method
+POST
+Status Code
+403 Forbidden
+Remote Address
+[::1]:8080
+Referrer Policy
+strict-origin-when-cross-origin
+src\lib\services\event.service.ts (43:15) @ createEvent
+
+
+  41 |
+  42 |     if (!response.ok) {
+> 43 |         throw new Error('Failed to create event');
+     |               ^
+  44 |     }
+  45 |
+  46 |     return response.json();
+
+address
+: 
+{,…}
+city
+: 
+"src\\lib\\services\\event.service.ts (43:15) @ createEvent     41 |   42 |     if (!response.ok) { > 43 |         throw new Error('Failed to create event');      |               ^   44 |     }   45 |   46 |     return response.json();"
+complement
+: 
+""
+neighborhood
+: 
+""
+number
+: 
+"0"
+state
+: 
+"sr"
+street
+: 
+"src\\lib\\services\\event.service.ts (43:15) @ createEvent     41 |   42 |     if (!response.ok) { > 43 |         throw new Error('Failed to create event');      |               ^   44 |     }   45 |   46 |     return response.json();"
+zipCode
+: 
+"00000-000"
+coverImageUrl
+: 
+""
+description
+: 
+"src\\lib\\services\\event.service.ts (43:15) @ createEvent\n\n\n  41 |\n  42 |     if (!response.ok) {\n> 43 |         throw new Error('Failed to create event');\n     |               ^\n  44 |     }\n  45 |\n  46 |     return response.json();\n\nObjetivos:\nsrc\\lib\\services\\event.service.ts (43:15) @ createEvent\n\n\n  41 |\n  42 |     if (!response.ok) {\n> 43 |         throw new Error('Failed to create event');\n     |               ^\n  44 |     }\n  45 |\n  46 |     return response.json();\n\nBenefícios:\nsrc\\lib\\services\\event.service.ts (43:15) @ createEvent\n\n\n  41 |\n  42 |     if (!response.ok) {\n> 43 |         throw new Error('Failed to create event');\n     |               ^\n  44 |     }\n  45 |\n  46 |     return response.json();\n\nFunções:\nsrc\\lib\\services\\event.service.ts (43:15) @ createEvent     41 |   42 |     if (!response.ok) { > 43 |         throw new Error('Failed to create event');      |               ^   44 |     }   45 |   46 |     return response.json();"
+endDate
+: 
+"2000-12-10T10:25:00"
+filledSlots
+: 
+0
+organizationId
+: 
+1
+pointsReward
+: 
+10
+startDate
+: 
+"2000-12-10T10:11:00"
+tags
+: 
+[{code: "educação", label: "Educação"}]
+0
+: 
+{code: "educação", label: "Educação"}
+title
+: 
+"src\\lib\\services\\event.service.ts (43:15) @ createEvent     41 |   42 |     if (!response.ok) { > 43 |         throw new Error('Failed to create event');      |               ^   44 |     }   45 |   46 |     return response.json();"
+volunteerSlots
+: 
+11

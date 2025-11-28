@@ -1,14 +1,10 @@
 package edu.ifsc.reevo.repository;
 
-import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.stereotype.Repository;
-
 import edu.ifsc.reevo.model.helper.Tag;
+import org.springframework.data.jpa.repository.JpaRepository;
 
-import java.util.List;
+import java.util.Optional;
 
-@Repository
 public interface TagRepository extends JpaRepository<Tag, Long> {
-
-    List<Tag> findByCode(String code);
+    Optional<Tag> findByCode(String code);
 }

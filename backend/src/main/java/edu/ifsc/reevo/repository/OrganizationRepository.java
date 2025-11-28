@@ -15,4 +15,6 @@ public interface OrganizationRepository extends JpaRepository<Organization, Long
     Organization findByEmail(String email);
 
     List<Organization> findByActiveTrue();
+
+    
 }
