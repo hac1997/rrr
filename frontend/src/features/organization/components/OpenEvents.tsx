@@ -4,6 +4,7 @@ import React, { useState } from 'react';
 import { Calendar, MapPin, Users, XCircle, Search as SearchIcon, Award, UserCheck, Edit, Filter, Clock } from 'lucide-react';
 import VolunteerSearch from './VolunteerSearch';
 import EventScoring from './EventScoring';
+import VolunteerGroups from './VolunteerGroups';
 import { MOCK_OPEN_EVENTS } from '@/lib/services/orgData';
 import { OrgEventSummary } from '@/lib/types';
 import { cancelEvent } from '@/lib/services/event.service';
@@ -20,6 +21,7 @@ const OpenEvents: React.FC<OpenEventsProps> = ({ events, onEdit, onUpdate }) => 
   const [selectedEvent, setSelectedEvent] = useState<OrgEventSummary | null>(null);
   const [showVolunteerSearch, setShowVolunteerSearch] = useState(false);
   const [showEventScoring, setShowEventScoring] = useState(false);
+  const [showVolunteerGroups, setShowVolunteerGroups] = useState(false);
 
   const filteredEvents = events.filter(event =>
     event.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -35,6 +37,11 @@ const OpenEvents: React.FC<OpenEventsProps> = ({ events, onEdit, onUpdate }) => 
   const handleSearchVolunteers = (event: OrgEventSummary) => {
     setSelectedEvent(event);
     setShowVolunteerSearch(true);
+  };
+
+  const handleManageGroups = (event: OrgEventSummary) => {
+    setSelectedEvent(event);
+    setShowVolunteerGroups(true);
   };
 
   const handleCancelEvent = async (event: OrgEventSummary) => {
@@ -207,6 +214,13 @@ const OpenEvents: React.FC<OpenEventsProps> = ({ events, onEdit, onUpdate }) => 
                           Buscar Voluntários
                         </button>
                         <button
+                          onClick={() => handleManageGroups(event)}
+                          className="px-4 py-2 border border-purple-200 text-purple-600 rounded-lg hover:bg-purple-50 transition-colors flex items-center text-sm font-medium"
+                        >
+                          <Users className="h-4 w-4 mr-2" />
+                          Gerenciar Grupos
+                        </button>
+                        <button
                           onClick={() => handleCloseEvent(event)}
                           className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 shadow-sm hover:shadow transition-all duration-200 flex items-center text-sm font-medium"
                         >
@@ -230,6 +244,21 @@ const OpenEvents: React.FC<OpenEventsProps> = ({ events, onEdit, onUpdate }) => 
           </div>
         </div>
       </div>
+
+      {/* Volunteer Groups Modal */}
+      {showVolunteerGroups && selectedEvent && (
+        <VolunteerGroups
+          eventId={selectedEvent.id}
+          eventTitle={selectedEvent.title}
+          availableVolunteers={Array.from({ length: selectedEvent.volunteers }, (_, i) => ({
+            id: i + 1,
+            name: `Voluntário ${i + 1}`,
+            email: `voluntario${i + 1}@example.com`,
+            role: 'Voluntário'
+          }))}
+          onClose={() => setShowVolunteerGroups(false)}
+        />
+      )}
     </div>
   );
 };

@@ -207,7 +207,7 @@ const EventFeed: React.FC<EventFeedProps> = ({ dashboardData }) => {
                   </button>
                 </div>
               </div>
-            </div>
+            </article>
           ))
         )}
       </div>
